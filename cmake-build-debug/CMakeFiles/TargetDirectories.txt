@@ -1,0 +1,3 @@
+/home/teggot/CLionProjects/NumberCircle/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/teggot/CLionProjects/NumberCircle/cmake-build-debug/CMakeFiles/NumberCircle.dir
+/home/teggot/CLionProjects/NumberCircle/cmake-build-debug/CMakeFiles/edit_cache.dir
