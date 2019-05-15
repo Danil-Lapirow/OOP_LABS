@@ -88,11 +88,44 @@ public:
 
         return *current;
     }
+
+    int operator>(int){
+        return read();
+    }
+
+    int operator>>(int){
+        return pop();
+    }
+
+    NumberCircle &operator<(int value){
+        insert(value);
+        return *this;
+    }
+
+    NumberCircle &operator++(){
+        forward();
+        return *this;
+    }
+
+    NumberCircle &operator++(int){
+        forward();
+        return *this;
+    }
+
+    NumberCircle &operator--(){
+        backward();
+        return *this;
+    }
+
+    NumberCircle &operator--(int){
+        backward();
+        return *this;
+    }
 };
 
 int main() {
     NumberCircle c;
-    c.insert(16);
+    c < 16;
     c.insert(15);
     c.insert(14);
     c.insert(13);
@@ -111,7 +144,7 @@ int main() {
 
     for (int i = 0; i < 20; i++) {
         std::cout << c.pop() << std::endl;
-        c.forward();
+        c++;
     }
 
     return 0;
