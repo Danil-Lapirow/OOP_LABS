@@ -7,38 +7,56 @@ private:
 	int left;
 	int right;
 public:
-	Diapason(int left, int right) {
-		this->left = left;
-		this->right = right;
-	};
-	~Diapason() {
-	};
+	Diapason(int left, int right) : left(left), right(right) {}
+
+	~Diapason() {}
+
+    Diapason() {
+        left = 0;
+        right = 0;
+    }
+
+    Diapason(Diapason &other) {
+        left = other.left;
+        right = other.right;
+    }
+
+    Diapason(Diapason &&other) {
+        left = other.left;
+        right = other.right;
+        other.left = other.right = 0;
+    }
+
 	void insert() {
 		cout << "Insert left range of edge: ";
 		cin >> left;
 		cout << "\nInsert right range of edge: ";
 		cin >> right;
 	}
+
 	int getLeft() {
 		return left;
-	};
+	}
 	int getRight() {
 		return right;
-	};
-
+	}
 
 	int findLength() {
 		return right - left;
-	};
+	}
 	bool checkForExist(int checkValue) {
-		if (checkValue >= left && checkValue <= right)return true;
-		else return false;
-	};
+		if (checkValue >= left && checkValue <= right)
+            return true;
+		else 
+            return false;
+	}
 
 	bool intersection(Diapason x) {
-		if (x.left >= left && x.left <= right || x.right >= left && x.right <= right) return true;
-		else return false;
-	};
+		if (x.left >= left && x.left <= right || x.right >= left && x.right <= right)
+            return true;
+		else 
+            return false;
+	}
 };
 
 int main()
