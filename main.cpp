@@ -13,6 +13,39 @@ public:
         current = start;
     }
 
+    NumberCircle(std::initializer_list<int> lst) {
+        start = new int[maxLen];
+        current = start;
+
+        for (auto it : lst) {
+            insert(it);
+//            forward();
+        }
+        current = start;
+    }
+
+    NumberCircle(NumberCircle &other) {
+        start = new int[other.maxLen];
+        current = start + (other.current - other.start);
+        curLen = other.curLen;
+        maxLen = other.maxLen;
+        for (int i = 0; i < curLen; i++)
+            start[i] = other.start[i];
+    }
+
+    NumberCircle(NumberCircle &&other) {
+        start = other.start;
+        other.start = nullptr;
+        current = start + (other.current - other.start);
+        curLen = other.curLen;
+        maxLen = other.maxLen;
+    }
+
+    ~NumberCircle() {
+        delete start;
+//        delete current;
+    }
+
     int read() {
         return *current;
     }
@@ -56,12 +89,13 @@ public:
         if (empty())
             return 0;
         int res = *current;
-        for (int *i = current; i < start + curLen; i++) {
+        for (int *i = current; i < start + curLen; i++)
             i[0] = i[1];
-        }
+
         curLen--;
-        if(current == start + curLen)
+        if (current == start + curLen)
             current = start;
+
         return res;
     }
 
@@ -89,63 +123,64 @@ public:
         return *current;
     }
 
-    int operator>(int){
-        return read();
+    NumberCircle &operator>(int &var) {
+        var = read();
+        return *this;
     }
 
-    int operator>>(int){
-        return pop();
+    NumberCircle &operator>>(int &var) {
+        var = pop();
+        return *this;
     }
 
-    NumberCircle &operator<(int value){
+    NumberCircle &operator<(int value) {
         insert(value);
         return *this;
     }
 
-    NumberCircle &operator++(){
+    NumberCircle &operator++() {
         forward();
         return *this;
     }
 
-    NumberCircle &operator++(int){
+    NumberCircle operator++(int) {
+        NumberCircle saved(*this);
         forward();
-        return *this;
+        return saved;
     }
 
-    NumberCircle &operator--(){
+    NumberCircle &operator--() {
         backward();
         return *this;
     }
 
-    NumberCircle &operator--(int){
+    NumberCircle operator--(int) {
+        NumberCircle saved(*this);
         backward();
-        return *this;
+        return saved;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, NumberCircle &circle) {
+        return os << circle.pop();
+    }
+
+    friend std::ostream &operator<(std::ostream &os, NumberCircle &circle) {
+        return os << circle.read();
     }
 };
 
 int main() {
-    NumberCircle c;
-    c < 16;
-    c.insert(15);
-    c.insert(14);
-    c.insert(13);
-    c.insert(12);
-    c.insert(11);
-    c.insert(10);
-    c.insert(9);
-    c.insert(8);
-    c.insert(7);
-    c.insert(6);
-    c.insert(5);
-    c.insert(4);
-    c.insert(3);
-    c.insert(2);
-    c.insert(1);
+    NumberCircle c{16, 15, 14, 13, 12, 11, 10};
+    c < 9 < 8 < 7 < 6 < 5 < 4 < 3 < 2 < 1;
+
+    int t;
 
     for (int i = 0; i < 20; i++) {
-        std::cout << c.pop() << std::endl;
-        c++;
+        std::cout << c << " |";
+        std::cout << (c++ >> t) << "-";
+        std::cout << t << "| ";
     }
+
 
     return 0;
 }
