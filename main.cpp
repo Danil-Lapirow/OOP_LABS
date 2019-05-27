@@ -1,118 +1,155 @@
 #include <iostream>
 
-class NumberCircle {
-private:
-    int *start;
-    int *current;
-    int maxLen = 10;
-    int curLen = 0;
+class Sequence {
+protected:
+    double start, changer;
 
 public:
-    NumberCircle() {
-        start = new int[maxLen];
-        current = start;
+    Sequence() : start(0), changer(0) {}
+
+    Sequence(Sequence &obj) {
+        start = obj.start;
+        changer = obj.changer;
     }
 
-    int read() {
-        return *current;
+    Sequence(Sequence &&obj) {
+        start = obj.start;
+        obj.start = 0;
+        changer = obj.changer;
+        obj.changer = 0;
     }
 
-    int size() {
-        return curLen;
-    }
+    Sequence(int start, int changer) : start(start), changer(changer) {}
 
-    bool empty() {
-        return curLen == 0;
-    }
+    virtual double getSum(long long n) = 0;
 
-    void insert(int value) {
-        if (curLen + 1 == maxLen) {
-            int *tmp = new int[maxLen *= 2];
-            bool greater = false;
-            for (int i = 0; i < curLen; i++) {
-                if (start + i == current) {
-                    tmp[i] = value;
-                    greater = true;
-                }
+    virtual Sequence *toPointer() = 0;
+};
 
-                tmp[i + greater] = start[i];
-            }
-            delete start;
-            start = tmp;
-            current = start;
-        } else {
+class Arithmetical : public Sequence {
 
-            int prev = value;
-            for (int *i = current; i < start + curLen + 1; i++) {
-                int tmp = *i;
-                i[0] = prev;
-                prev = tmp;
-            }
+public:
+    Arithmetical(int start, int changer) : Sequence(start, changer) {}
+
+    double getSum(long long n) override {
+
+        double tmp = start, result = tmp;
+
+        for (int i = 1; i < n; i++) {
+            result += (tmp += changer);
         }
-        curLen++;
+
+        return result;
     }
 
-    int pop() {
-        if (empty())
-            return 0;
-        int res = *current;
-        for (int *i = current; i < start + curLen; i++) {
-            i[0] = i[1];
-        }
-        curLen--;
-        if(current == start + curLen)
-            current = start;
-        return res;
-    }
-
-    int forward(int i = 0) {
-        if (i > 0)
-            forward(i - 1);
-
-        if (current == start + curLen - 1)
-            current = start;
-        else
-            current++;
-
-        return *current;
-    }
-
-    int backward(int i = 0) {
-        if (i > 0)
-            backward(i - 1);
-
-        if (current == start)
-            current = start + curLen - 1;
-        else
-            current--;
-
-        return *current;
+    Sequence *toPointer() override {
+        return new Arithmetical(std::move(*this));
     }
 };
 
-int main() {
-    NumberCircle c;
-    c.insert(16);
-    c.insert(15);
-    c.insert(14);
-    c.insert(13);
-    c.insert(12);
-    c.insert(11);
-    c.insert(10);
-    c.insert(9);
-    c.insert(8);
-    c.insert(7);
-    c.insert(6);
-    c.insert(5);
-    c.insert(4);
-    c.insert(3);
-    c.insert(2);
-    c.insert(1);
+class Geometrical : public Sequence {
+public:
+    Geometrical(int start, int changer) : Sequence(start, changer) {}
 
-    for (int i = 0; i < 20; i++) {
-        std::cout << c.pop() << std::endl;
-        c.forward();
+    double getSum(long long n) override {
+        double tmp = start, result = tmp;
+
+        for (int i = 1; i < n; i++) {
+            result += (tmp *= changer);
+        }
+
+        return result;
     }
+
+    Sequence *toPointer() override {
+        return new Geometrical(std::move(*this));
+    }
+};
+
+class Fibbonachi : public Sequence {
+public:
+    Fibbonachi(int start, int changer) : Sequence(start, changer) {}
+
+    Fibbonachi() {
+        start = 1;
+        changer = 0;
+    };
+
+    double getSum(long long n) override {
+
+        double tmp = start, result = tmp;
+
+        for (int i = 1; i < n; i++) {
+            result += (tmp += changer);
+
+            changer = result;
+        }
+
+        changer = 0;
+
+        return result;
+    }
+
+    Sequence *toPointer() override {
+        return new Fibbonachi(std::move(*this));
+    }
+};
+
+class Container {
+private:
+    Sequence **lst = nullptr;
+    int curLen = 0, maxLen = 10;
+
+public:
+    Container() = default;
+
+    ~Container() {
+        delete[] lst;
+    }
+
+    void expand() {
+        lst = new Sequence *[maxLen *= 2];
+    }
+
+    void push(Sequence &obj) {
+        push(obj.toPointer());
+    }
+
+    void push(Sequence *obj) {
+        if (lst == nullptr)
+            expand();
+
+        if (curLen == maxLen) {
+            Sequence **saved = lst;
+            expand();
+            for (int i = 0; i < curLen; i++)
+                lst[i] = saved[i];
+
+            delete saved;
+        }
+
+        lst[curLen] = obj;
+
+        curLen += 1;
+    }
+
+    double caclSum(int n) {
+        double res = 0;
+
+        for (int i = 0; i < curLen; res += lst[i]->getSum(n), i++) {}
+
+        return res;
+    }
+
+};
+
+int main() {
+    Container c;
+    c.push(new Fibbonachi());
+    c.push(new Arithmetical(1, 2));
+    c.push(new Geometrical(1, 1/3));
+
+    std::cout << c.caclSum(2) << std::endl;
 
     return 0;
 }
