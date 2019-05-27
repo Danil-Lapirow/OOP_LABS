@@ -1,53 +1,46 @@
 #include <iostream>
+#include <sstream>
 
-class NumberCircle {
+class Stack {
 private:
     int *start;
-    int *current;
     int maxLen = 10;
     int curLen = 0;
 
 public:
-    NumberCircle() {
+    Stack() {
         start = new int[maxLen];
-        current = start;
     }
 
-    NumberCircle(std::initializer_list<int> lst) {
+    Stack(std::initializer_list<int> lst) {
         start = new int[maxLen];
-        current = start;
 
         for (auto it : lst) {
-            insert(it);
-//            forward();
+            push(it);
         }
-        current = start;
     }
 
-    NumberCircle(NumberCircle &other) {
+    Stack(Stack &other) {
         start = new int[other.maxLen];
-        current = start + (other.current - other.start);
         curLen = other.curLen;
         maxLen = other.maxLen;
         for (int i = 0; i < curLen; i++)
             start[i] = other.start[i];
     }
 
-    NumberCircle(NumberCircle &&other) {
+    Stack(Stack &&other) {
         start = other.start;
         other.start = nullptr;
-        current = start + (other.current - other.start);
         curLen = other.curLen;
         maxLen = other.maxLen;
     }
 
-    ~NumberCircle() {
+    ~Stack() {
         delete start;
-//        delete current;
     }
 
     int read() {
-        return *current;
+        return curLen == 0 ? 0 : start[curLen - 1];
     }
 
     int size() {
@@ -58,29 +51,18 @@ public:
         return curLen == 0;
     }
 
-    void insert(int value) {
+    Stack &operator=(const Stack& other)= default;
+
+    void push(int value) {
         if (curLen + 1 == maxLen) {
             int *tmp = new int[maxLen *= 2];
-            bool greater = false;
             for (int i = 0; i < curLen; i++) {
-                if (start + i == current) {
-                    tmp[i] = value;
-                    greater = true;
-                }
-
-                tmp[i + greater] = start[i];
+                tmp[i] = start[i];
             }
             delete start;
             start = tmp;
-            current = start;
         } else {
-
-            int prev = value;
-            for (int *i = current; i < start + curLen + 1; i++) {
-                int tmp = *i;
-                i[0] = prev;
-                prev = tmp;
-            }
+            start[curLen] = value;
         }
         curLen++;
     }
@@ -88,97 +70,58 @@ public:
     int pop() {
         if (empty())
             return 0;
-        int res = *current;
-        for (int *i = current; i < start + curLen; i++)
-            i[0] = i[1];
+
+        int res = read();
 
         curLen--;
-        if (current == start + curLen)
-            current = start;
 
         return res;
     }
 
-    int forward(int i = 0) {
-        if (i > 0)
-            forward(i - 1);
-
-        if (current == start + curLen - 1)
-            current = start;
-        else
-            current++;
-
-        return *current;
-    }
-
-    int backward(int i = 0) {
-        if (i > 0)
-            backward(i - 1);
-
-        if (current == start)
-            current = start + curLen - 1;
-        else
-            current--;
-
-        return *current;
-    }
-
-    NumberCircle &operator>(int &var) {
+    Stack &operator>(int &var) {
         var = read();
         return *this;
     }
 
-    NumberCircle &operator>>(int &var) {
+    Stack &operator>>(int &var) {
         var = pop();
         return *this;
     }
 
-    NumberCircle &operator<(int value) {
-        insert(value);
+    Stack &operator<(int value) {
+        push(value);
         return *this;
     }
 
-    NumberCircle &operator++() {
-        forward();
-        return *this;
+    friend std::ostream &operator<<(std::ostream &os, Stack &other) {
+        return os << other.pop();
     }
 
-    NumberCircle operator++(int) {
-        NumberCircle saved(*this);
-        forward();
-        return saved;
+    friend std::istream &operator>>(std::istream &os, Stack &other) {
+        int t = 0;
+        std::cout << "Number to insert into stack: ";
+        os >> t;
+        other < t;
+        return os;
     }
 
-    NumberCircle &operator--() {
-        backward();
-        return *this;
-    }
-
-    NumberCircle operator--(int) {
-        NumberCircle saved(*this);
-        backward();
-        return saved;
-    }
-
-    friend std::ostream &operator<<(std::ostream &os, NumberCircle &circle) {
-        return os << circle.pop();
-    }
-
-    friend std::ostream &operator<(std::ostream &os, NumberCircle &circle) {
-        return os << circle.read();
+    friend std::ostream &operator<(std::ostream &os, Stack &other) {
+        return os << other.read();
     }
 };
 
 int main() {
-    NumberCircle c{16, 15, 14, 13, 12, 11, 10};
-    c < 9 < 8 < 7 < 6 < 5 < 4 < 3 < 2 < 1;
+    Stack c{16, 15, 14, 13, 12, 11, 10};
+    c < 9 < 8 < 7 < 6 < 5 < 4 < 3;
 
-    int t;
+    std::cin >> c;
+    std::cin >> c;
 
-    for (int i = 0; i < 20; i++) {
-        std::cout << c << " |";
-        std::cout << (c++ >> t) << "-";
-        std::cout << t << "| ";
+    std::cout << "| ";
+
+    while (!c.empty()) {
+        std::cout << c << " - ";
+        (std::cout < c) << " | ";
     }
 
 
